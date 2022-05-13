@@ -1,0 +1,23 @@
+{
+  "name": "nodata",
+  "version": "0.0.0",
+  "description": "For when you don't have data",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryanshepps/NoData.git"
+  },
+  "keywords": [
+    "no",
+    "data"
+  ],
+  "author": "Tendys",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryanshepps/NoData/issues"
+  },
+  "homepage": "https://github.com/ryanshepps/NoData#readme"
+}
