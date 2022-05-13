@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/ryanshepps/NoData/issues"
   },
-  "homepage": "https://github.com/ryanshepps/NoData#readme"
+  "homepage": "https://github.com/ryanshepps/NoData#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
 }
