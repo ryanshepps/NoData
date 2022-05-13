@@ -22,5 +22,8 @@
   "homepage": "https://github.com/ryanshepps/NoData#readme",
   "devDependencies": {
     "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "axios": "^0.27.2"
   }
 }
