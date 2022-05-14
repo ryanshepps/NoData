@@ -1,11 +1,9 @@
-name: deploy
+name: build and deploy
 
 on:
-  pull_request:
   push:
     branches:
       - 'main'
-  workflow_dispatch:
 
 jobs:
   deploy:
@@ -34,7 +32,6 @@ jobs:
     - name: 'push'
       run: |
         docker  push gcr.io/${{ secrets.GCP_PROJECT_ID}}/nodata:latest
-
 
     - name: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v0'
