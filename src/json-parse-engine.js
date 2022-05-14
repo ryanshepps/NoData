@@ -6,23 +6,17 @@ const defaultParams = {
     "name": false,
     "url": false,
     "isff": false,
-    "durl": false,
-    "dlc": false,
     "search": ""
 }
 
-const defaultFlagsSms = ["list", "name", "url", "isff", "durl", "dlc", "search"];
+const defaultFlagsSms = ["list", "name", "url", "isff", "search"];
 
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
-    result = [];
     result = search.map((value) => {
         filteredValue = { "search": value["snippet"] };
         if (params["name"]) filteredValue["name"] = value["name"];
         if (params["url"]) filteredValue["url"] = value["url"];
-        if (params["isFamilyFriendly"]) filteredValue["isFamilyFriendly"] = value["isff"];
-        if (params["durl"]) filteredValue["durl"] = value["displayUrl"];
-        if (params["dlc"]) filteredValue["dlc"] = value["dateLastCrawled"];
         return filteredValue;
     });
     return result;
