@@ -22,6 +22,7 @@ app.post('/sms', async (req, res) => {
                 const results = jsonEngine.results(raw_search.value, params);
                 const sms = jsonEngine.formatSms(results);
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
+                console.log(sms.toString());
                 res.end(sms.toString());
         } catch (e) {
                 console.log("error: ", e);
