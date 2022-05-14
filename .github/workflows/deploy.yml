@@ -23,9 +23,22 @@ jobs:
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
+    - name: 'configure docker'
+      run: |
+        gcloud auth configure-docker
+
+    - name: 'build'
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/nodata:latest .
+    
+    - name: 'push'
+      run: |
+        docker  push gcr.io/${{ secrets.GCP_PROJECT_ID}}/nodata:latest
+
+
     - name: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v0'
       with:
-        service: 'nodata-350123'
-        image: 'gcr.io/cloudrun/placeholder'
+        service: 'nodata'
+        image: 'gcr.io/${{secrets.GCP_PROJECT_ID}}/nodata:latest'
 
