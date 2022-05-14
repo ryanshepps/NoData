@@ -1,0 +1,24 @@
+name: build
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: 'actions/checkout@v3'
+
+    - name: 'configure docker'
+      run: |
+        gcloud auth configure-docker
+
+    - name: 'build'
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/nodata:latest .
+    
