@@ -4,11 +4,10 @@ const defaultParams = {
     "list": 1,
     "name": false,
     "url": false,
-    "ff": false,
     "search": ""
 }
 
-const defaultFlagsSms = ["list", "name", "url", "ff", "search"];
+const defaultFlagsSms = ["list", "name", "url", "search"];
 
 const helpMessage = 'See "nodata --help" for further details.'
 const helpSms = `USAGE:
@@ -25,16 +24,13 @@ Provides the name of the result.
 --url -->
 Provides the address of the result.
 
---ff -->
-Provides family-friendly results.
-
 
 EXAMPLES:
 nodata Will it rain tomorrow?
 
-nodata Will it rain tomorrow? --name --url --ff
+nodata Will it rain tomorrow? --name --url
 
-nodata Will it rain tomorrow? --result 3 --name --url --ff`
+nodata Will it rain tomorrow? --result 3 --name --url`
 
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
