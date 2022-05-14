@@ -1,4 +1,3 @@
-const e = require("express");
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
 const defaultParams = {
@@ -22,15 +21,16 @@ exports.results = (raw_search, params) => {
     return result;
 }
 
-exports.formatSms = (results, numResults) => {
+exports.formatSms = (results) => {
     const twiml = new MessagingResponse();
+    const numResults = results.length;
     let resultCount = 1;
     results.map((result) => {
-        let sms = "-\n";
-        if (numResults >= 2) result["list"] = numResults;
+        let sms = "";
         defaultFlagsSms.map((flag) => {
-            if (result[flag] && flag === "list") sms += "@@\n" + flag + " -->\nShowing " + resultCount + " of " + result[flag] + "\n";
-            else if (result[flag]) sms += "@@\n" + flag + " -->\n" + result[flag] + "\n";
+            upperFlag = flag.toUpperCase();
+            if (numResults > 1 && flag === "list") sms += `${upperFlag} -->\nShowing ${resultCount} of ${numResults}\n\n`;
+            else if (result[flag]) sms += `${upperFlag} -->\n${result[flag]}\n\n`;
         });
         resultCount++;
         twiml.message(sms);
