@@ -1,0 +1,32 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: 'actions/checkout@v3'
+
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: 'deploy'
+      uses: 'google-github-actions/deploy-cloudrun@v0'
+      with:
+        service: 'nodata-350123'
+        image: 'gcr.io/cloudrun/nodata:latest'
+
+    - name: 'output'
+      run: 'curl "${{ steps.deploy.outputs.url }}"'
