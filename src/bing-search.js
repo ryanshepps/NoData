@@ -8,7 +8,7 @@ const createOptions = (q, rapidApiKey) => ({
     method: 'GET',
     url: 'https://bing-web-search1.p.rapidapi.com/search',
     params: {
-        q: '', // Updated depending on params.
+        q: q,
         mkt: 'en-us',
         safeSearch: 'Off',
         textFormat: 'Raw',
