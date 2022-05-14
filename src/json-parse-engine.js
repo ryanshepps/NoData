@@ -4,11 +4,12 @@ const defaultParams = {
     "list": 1,
     "name": false,
     "url": false,
-    "isff": false,
+    "ff": false,
     "search": ""
 }
 
-const defaultFlagsSms = ["list", "name", "url", "isff", "search"];
+const defaultFlagsSms = ["list", "name", "url", "ff", "search"];
+
 const helpMessage = 'See "nodata --help" for further details.'
 
 exports.results = (raw_search, params) => {
