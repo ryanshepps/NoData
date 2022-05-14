@@ -27,7 +27,7 @@ jobs:
       uses: 'google-github-actions/deploy-cloudrun@v0'
       with:
         service: 'nodata-350123'
-        image: 'gcr.io/cloudrun/nodata:latest'
+        image: 'gcr.io/cloudrun/placeholder'
 
     - name: 'output'
       run: 'curl "${{ steps.deploy.outputs.url }}"'
