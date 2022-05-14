@@ -25,8 +25,7 @@ exports.search = async (q) => {
     options.params.q = q;
     try {
         const response = await axios.request(options);
-        const data = response.data.webPages;
-        return data;
+        return response.data.webPages;
     } catch (error) {
         console.log(error);
     }
