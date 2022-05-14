@@ -4,10 +4,6 @@
     >
 </p>
 
-# NoData
-
-## Usage
-
 Text 
 
 ```
@@ -15,6 +11,45 @@ nodata --help
 ```
 
 to `(343) 341-6894`
+
+## Architecture
+
+### Stack
+
+#### Node
+
+Our server is written in JavaScript and ran on Node.
+
+#### Twilio
+
+We use Twilio to coordiante SMS sending and receiving.
+
+#### RapidAPI
+
+RapidAPI is used in conjunction with bing web search to search get results for a search on the internet.
+
+#### Docker
+
+We use docker to containerize our app. Containerization allows us to streamline our deploymnet process.
+
+#### Google Cloud
+
+Our Node backend is deployed on **Google Cloud using Google Cloud Run**.
+
+We also use **Google Cloud's Secret Manager** so that we don't expose our API keys.
+
+#### Domain.com
+
+We use a nodataa.tech domain internally. Our domain is registered with domain.com.
+
+### Sequence Diagram
+
+<p align="center">
+    <img
+        width=700
+        src="./assets/architecture.png"
+    >
+</p>
 
 ## Development
 
