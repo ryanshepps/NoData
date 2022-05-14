@@ -11,6 +11,30 @@ const defaultParams = {
 const defaultFlagsSms = ["list", "name", "url", "ff", "search"];
 
 const helpMessage = 'See "nodata --help" for further details.'
+const helpSms = `USAGE:
+nodata [search text] [options]
+
+
+OPTIONS:
+--result [number] -->
+Displays the number-th result.
+
+--name -->
+Provides the name of the result.
+
+--url -->
+Provides the address of the result.
+
+--ff -->
+Provides family-friendly results.
+
+
+EXAMPLES:
+nodata Will it rain tomorrow?
+
+nodata Will it rain tomorrow? --name --url --ff
+
+nodata Will it rain tomorrow? --result 3 --name --url --ff`
 
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
@@ -41,8 +65,7 @@ exports.formatSms = (results) => {
 }
 
 exports.params = (params) => {
-    if (!(params.substring(0, 6) === "nodata")) throw 'Text "nodata --help" to get started.';
-    if (!(params.substring(0, 15) === "nodata --search")) throw 'A "--search" flag must be provided before other flags. ' + helpMessage;
+    if (params.substring(0, 15) !== "nodata --search") throw 'A "--search" flag must be provided before other flags. ' + helpMessage;
 
     let newParams = defaultParams;
     let res = params.substring(6, params.length).split(" --");
@@ -63,4 +86,10 @@ exports.params = (params) => {
     });
 
     return newParams;
+}
+
+exports.helpMenu = () => {
+    const twiml = new MessagingResponse();
+    twiml.message(helpSms);
+    return twiml;
 }
