@@ -10,6 +10,10 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.get('/', async (req, res) => {
+    res.end('Yup! The server is up and running :)');
+});
+
 app.post('/sms', async (req, res) => {
         const twiml = new MessagingResponse();
         try {
