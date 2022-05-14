@@ -17,9 +17,9 @@ app.post('/sms', async (req, res) => {
                 if (!params) throw "error";
                 let raw_search = await bingSearch.search(params.search);
                 let results = jsonEngine.results(raw_search.value, params);
-                twiml.message("JSON.stringify(results)\nhello\nworrd\n");
+                let sms = jsonEngine.formatSms(results, params.list);
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
-                res.end(twiml.toString());
+                res.end(sms.toString());
         } catch (e) {
                 console.log("error: ", e);
                 twiml.message("yo fam check the syntax");

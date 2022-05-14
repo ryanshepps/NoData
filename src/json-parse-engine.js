@@ -1,6 +1,7 @@
 const e = require("express");
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
-var defaultParams = {
+const defaultParams = {
     "list": 1,
     "name": false,
     "url": false,
@@ -10,19 +11,37 @@ var defaultParams = {
     "search": ""
 }
 
+const defaultFlagsSms = ["list", "name", "url", "isff", "durl", "dlc", "search"];
+
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
     result = [];
     result = search.map((value) => {
-        filteredValue = { "data": value["snippet"] };
+        filteredValue = { "search": value["snippet"] };
         if (params["name"]) filteredValue["name"] = value["name"];
         if (params["url"]) filteredValue["url"] = value["url"];
         if (params["isFamilyFriendly"]) filteredValue["isFamilyFriendly"] = value["isff"];
         if (params["durl"]) filteredValue["durl"] = value["displayUrl"];
         if (params["dlc"]) filteredValue["dlc"] = value["dateLastCrawled"];
         return filteredValue;
-    })
+    });
     return result;
+}
+
+exports.formatSms = (results, numResults) => {
+    const twiml = new MessagingResponse();
+    let resultCount = 1;
+    results.map((result) => {
+        let sms = "-\n";
+        if (numResults >= 2) result["list"] = numResults;
+        defaultFlagsSms.map((flag) => {
+            if (result[flag] && flag === "list") sms += "@@\n" + flag + " -->\nShowing " + resultCount + " of " + result[flag] + "\n";
+            else if (result[flag]) sms += "@@\n" + flag + " -->\n" + result[flag] + "\n";
+        });
+        resultCount++;
+        twiml.message(sms);
+    });
+    return twiml;
 }
 
 exports.params = (params) => {
