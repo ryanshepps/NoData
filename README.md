@@ -26,11 +26,11 @@ We use Twilio to coordiante SMS sending and receiving.
 
 #### RapidAPI
 
-RapidAPI is used in conjunction with bing web search to search get results for a search on the internet.
+RapidAPI is used in conjunction with bing web search to get results for a search on the internet.
 
 #### Docker
 
-We use docker to containerize our app. Containerization allows us to streamline our deploymnet process.
+We use docker to containerize our app. Containerization allows us to streamline our deployment process.
 
 #### Google Cloud
 
