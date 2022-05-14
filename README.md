@@ -1,3 +1,9 @@
+<p align="center">
+    <img
+        src="./assets/nausher.png"
+    >
+</p>
+
 # NoData
 
 ## Development
