@@ -6,6 +6,16 @@
 
 # NoData
 
+## Usage
+
+Text 
+
+```
+nodata --help
+```
+
+to `(343) 341-6894`
+
 ## Development
 
 ### Simulating Production Build
