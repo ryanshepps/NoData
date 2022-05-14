@@ -5,10 +5,10 @@ exports.secretsManager = () => {
 };
 
 exports.getSecret = async (client, name) => {
-    const secret = await client.getSecret({
+    const [accessResponse] = await client.accessSecretVersion({
         name: name,
     });
-
-    return secret;
+    
+    return accessResponse.payload.data.toString();
 };
 
