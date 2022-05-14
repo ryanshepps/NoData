@@ -17,10 +17,17 @@ app.get('/', async (req, res) => {
 app.post('/sms', async (req, res) => {
         const twiml = new MessagingResponse();
         try {
-                const params = jsonEngine.params(req.body.Body);
-                const raw_search = await bingSearch.search(params.search);
-                const results = jsonEngine.results(raw_search.value, params);
-                const sms = jsonEngine.formatSms(results);
+                const request = req.body.Body.trim();
+                let sms;
+                if (request.substring(0, 6) !== "nodata") throw 'Text "nodata --help" to get started.';
+                if (request === "nodata --help") {
+                        sms = jsonEngine.helpMenu();
+                } else {
+                        const params = jsonEngine.params(req.body.Body);
+                        const raw_search = await bingSearch.search(params.search);
+                        const results = jsonEngine.results(raw_search.value, params); 
+                        sms = jsonEngine.formatSms(results);
+                }
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
                 console.log(sms.toString());
                 res.end(sms.toString());
