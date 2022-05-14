@@ -45,28 +45,28 @@ exports.formatSms = (results, numResults) => {
 }
 
 exports.params = (params) => {
-    if (params.substring(0, 7) === "nodata ") {
+    if (params.substring(0, 6) === "nodata") {
         let newParams = defaultParams;
-        if (params.length <= 7) return false;
+        if (params.length <= 7) throw 'A "--search" flag must be provided';
 
         let res = params.substring(6, params.length).split(" --");
         res.shift();
 
         res.map((param) => {
-            if (param.substring(0, 7) === "search ") {
+            if (param.substring(0, 6) === "search") {
                 keyPair = [param.substring(0, 6), param.substring(7, param.length)];
+                if (keyPair[1] === "") throw 'A query for "--search" must be provided';
             } else {
                 keyPair = param.split(" ");
             }
             if (keyPair[0] in defaultParams) {
                 newParams[keyPair[0]] = keyPair[0] === "list" || keyPair[0] === "search" ? keyPair[1] : true;
             } else {
-                console.log("error");
-                throw "error";
+                throw "Invalid flag provided";
             }
         });
 
         return newParams;
     }
-    return false;
+    throw 'The text message must start with "nodata"';
 }
