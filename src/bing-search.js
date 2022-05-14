@@ -1,4 +1,8 @@
 const axios = require("axios");
+const secretsManagerClient = require('./secrets-manager').secretsManager();
+const secretsManager = require('./secrets-manager');
+
+const rapidApiKeyName = 'projects/7736567127/secrets/rapidapi-key';
 
 const options = {
     method: 'GET',
@@ -13,7 +17,7 @@ const options = {
     headers: {
         'X-BingApis-SDK': 'true',
         'X-RapidAPI-Host': 'bing-web-search1.p.rapidapi.com',
-        'X-RapidAPI-Key': 'cfdf27182dmshbf97c52786708a7p1d6790jsn4b62b203b61a'
+        'X-RapidAPI-Key': secretsManager.getSecret(secretsManagerClient, rapidApiKeyName),
     }
 };
 
