@@ -29,5 +29,3 @@ jobs:
         service: 'nodata-350123'
         image: 'gcr.io/cloudrun/placeholder'
 
-    - name: 'output'
-      run: 'curl "${{ steps.deploy.outputs.url }}"'
