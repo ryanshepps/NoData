@@ -28,6 +28,6 @@ app.post('/sms', async (req, res) => {
         }
 });
 
-http.createServer(app).listen(1337, () => {
-        console.log('Express server listening on port 1337');
+http.createServer(app).listen(3000, () => {
+        console.log('Express server listening on port 3000');
 });
