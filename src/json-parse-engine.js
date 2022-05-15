@@ -1,88 +1,67 @@
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const constants = require('./constants');
 
 const defaultParams = {
-    "list": 1,
+    "result": 1,
     "name": false,
     "url": false
 }
 
-const defaultFlagsSms = ["list", "name", "url", "search"];
-
-const helpMessage = 'Text "--help" for further details.'
-const helpSms = `USAGE:
-[search text] [options]
-
-
-OPTIONS:
---result [number] -->
-Displays the number-th result.
-
---name -->
-Provides the name of the result.
-
---url -->
-Provides the address of the result.
-
-
-EXAMPLES:
-Will it rain tomorrow?
-
-Will it rain tomorrow? --name --url
-
-Will it rain tomorrow? --result 3 --name --url`
-
-exports.results = (raw_search, params) => {
-    search = raw_search.slice(0, parseInt(params["list"]));
-    result = search.map((value) => {
-        filteredValue = { "search": value["snippet"] };
-        if (params["name"]) filteredValue["name"] = value["name"];
-        if (params["url"]) filteredValue["url"] = value["url"];
-        return filteredValue;
-    });
-    return result;
+exports.getSingleResult = (rawResults, resultNum) => {
+    return rawResults[resultNum - 1];
 }
 
-exports.formatSms = (results) => {
-    const twiml = new MessagingResponse();
-    const numResults = results.length;
-    let resultCount = 1;
-    results.map((result) => {
-        let sms = "";
-        defaultFlagsSms.map((flag) => {
-            upperFlag = flag.toUpperCase();
-            if (numResults > 1 && flag === "list") sms += `${upperFlag} -->\nShowing ${resultCount} of ${numResults}\n\n`;
-            else if (result[flag]) sms += `${upperFlag} -->\n${result[flag]}\n\n`;
-        });
-        resultCount++;
-        twiml.message(sms);
-    });
-    return twiml;
-}
+exports.filterResult = (result, params) => {
+    let filteredResult = {};
 
-exports.params = (params) => {
-    if (params.startsWith("--")) throw 'A query must be provided before the optional flags. ' + helpMessage;
-
-    let newParams = defaultParams;
-    let res = params.split(" --");
-    const searchQuery = res.shift();
-
-    // Optional flags provided in any order.
-    res.map((param) => {
-        const keyPair = param.split(" ");
-        if (keyPair[0] in defaultParams) {
-            newParams[keyPair[0]] = keyPair[0] === "list" ? keyPair[1] : true;
-        } else {
-            throw 'Invalid flag provided. ' + helpMessage;
+    Object.keys(params).forEach((paramKey) => {
+        if (params[paramKey] && paramKey !== "result") {
+            filteredResult[paramKey] = result[paramKey];
         }
     });
 
-    // Query search params always first thing provided.
-    newParams["search"] = searchQuery;
-    return newParams;
+    return filteredResult;
 }
 
-exports.helpMenu = () => {
-    const twiml = new MessagingResponse();
-    twiml.message(helpSms);
-    return twiml;
+exports.convertResultToMessage = (filteredResult, resultNum, numTotalResults) => {
+    let message = "";
+
+    // RESULT
+    message += `RESULT ${resultNum}/${numTotalResults}\n\n`;
+    message += `${filteredResult.snippet}\n\n`;
+
+    // NAME
+    if (filteredResult.name) {
+        message += `NAME: ${filteredResult.name}\n\n`;
+    }
+    
+    // URL
+    if (filteredResult.url) {
+        message += `URL: ${filteredResult.url}`;
+    }
+
+    return message;
 }
+
+exports.requestBodyToObj = (requestBodyStr) => {
+    if (requestBodyStr.startsWith("--")) throw 'A query must be provided before the optional flags. ' + constants.helpMessage;
+
+    let requestBodyObj = defaultParams;
+
+    let splitRequestBodyStr = requestBodyStr.split(" --");
+    const searchQuery = splitRequestBodyStr.shift();
+
+    // Optional flags provided in any order.
+    splitRequestBodyStr.map((param) => {
+        const keyPair = param.split(" ");
+        if (keyPair[0] in defaultParams) {
+            requestBodyObj[keyPair[0]] = keyPair[0] === "result" ? keyPair[1] : true;
+        } else {
+            throw 'Invalid flag provided. ' + constants.helpMessage;
+        }
+    });
+
+    // Query search requestBody always first thing provided.
+    requestBodyObj["snippet"] = searchQuery;
+    return requestBodyObj;
+}
+

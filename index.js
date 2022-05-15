@@ -1,12 +1,12 @@
 const http = require('http');
 const express = require('express');
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const bodyParser = require('body-parser');
 const bingSearch = require("./src/bing-search");
 const jsonEngine = require("./src/json-parse-engine");
+const constants = require('./src/constants');
+const twilio = require('./src/twilio');
 
 const app = express();
-// const search = bingSearch.search(q);
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -14,30 +14,30 @@ app.get('/', async (req, res) => {
     res.end('Yup! The server is up and running :)');
 });
 
-app.post('/sms', async (req, res) => {
-        const twiml = new MessagingResponse();
-        try {
-                const request = req.body.Body.trim();
-                let sms;
-                if (request === "--help") {
-                        sms = jsonEngine.helpMenu();
-                } else {
-                        const params = jsonEngine.params(req.body.Body);
-                        const raw_search = await bingSearch.search(params.search);
-                        const results = jsonEngine.results(raw_search.value, params); 
-                        sms = jsonEngine.formatSms(results);
-                }
-                res.writeHead(200, { 'Content-Type': 'text/xml' });
-                console.log(sms.toString());
-                res.end(sms.toString());
-        } catch (e) {
-                console.log("error: ", e);
-                twiml.message(e);
-                res.writeHead(200, { 'Content-Type': 'text/xml' });
-                res.end(twiml.toString());
+app.post('/sms', async (req, response) => {
+    try {
+        const requestBody = req.body.Body.trim();
+        let message;
+
+        if (requestBody.includes("--help")) {
+            message = constants.helpInstructions;
+        } else {
+            const requestBodyObj = jsonEngine.requestBodyToObj(requestBody);
+            const rawSearchResult = await bingSearch.search(requestBodyObj.snippet);
+            const searchResults = rawSearchResult.value; 
+
+            const result = jsonEngine.getSingleResult(searchResults, parseInt(requestBodyObj.result));
+
+            const filteredResult = jsonEngine.filterResult(result, requestBodyObj);
+            message = jsonEngine.convertResultToMessage(filteredResult, requestBodyObj.result, searchResults.length);
         }
+
+        twilio.sendMessage(response, message);
+    } catch (error) {
+        twilio.sendMessage(response, error);
+    }
 });
 
 http.createServer(app).listen(3000, () => {
-        console.log('Express server listening on port 3000');
+    console.log('Express server listening on port 3000');
 });
