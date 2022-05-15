@@ -1,35 +1,10 @@
-const twilio = require('./twilio');
+const constants = require('./constants');
 
 const defaultParams = {
     "result": 1,
     "name": false,
     "url": false
 }
-
-const defaultFlagsSms = ["result", "name", "url", "search"];
-
-const helpMessage = 'Text "--help" for further details.'
-const helpSms = `USAGE:
-[search text] [options]
-
-
-OPTIONS:
---result [number] -->
-Displays the number-th result.
-
---name -->
-Provides the name of the result.
-
---url -->
-Provides the address of the result.
-
-
-EXAMPLES:
-Will it rain tomorrow?
-
-Will it rain tomorrow? --name --url
-
-Will it rain tomorrow? --result 3 --name --url`
 
 exports.getSingleResult = (rawResults, resultNum) => {
     return rawResults[resultNum - 1];
@@ -44,56 +19,49 @@ exports.filterResult = (result, params) => {
         }
     });
 
-    console.log('filteredResult', filteredResult);
-
     return filteredResult;
 }
 
-exports.formatSms = (result, numTotalResults, requestedResultNum) => {
-    let sms = getRequestedResultInfo(result);
+exports.convertResultToMessage = (filteredResult, resultNum, numTotalResults) => {
+    let message = "";
 
-    sms += `RESULT ${requestedResultNum}/${numTotalResults} -->\n`
+    // RESULT
+    message += `RESULT ${resultNum}/${numTotalResults}\n\n`;
+    message += `${filteredResult.snippet}\n\n`;
 
-    return twilio.sendSms(sms);
+    // NAME
+    if (filteredResult.name) {
+        message += `NAME: ${filteredResult.name}\n\n`;
+    }
+    
+    // URL
+    if (filteredResult.url) {
+        message += `URL: ${filteredResult.url}`;
+    }
+
+    return message;
 }
 
-// returns a string with info that the user requests about the results
-const getRequestedResultInfo = (result, params) => {
-    let sms = "";
+exports.requestBodyToObj = (requestBodyStr) => {
+    if (requestBodyStr.startsWith("--")) throw 'A query must be provided before the optional flags. ' + constants.helpMessage;
 
-    defaultFlagsSms.forEach((flag) => {
-        if (flag !== "result") {
-            sms += `${flag.toUpperCase()} -->\n${result[flag]}\n\n`
-        }
-    });
+    let requestBodyObj = defaultParams;
 
-    return sms;
-}
-
-exports.params = (params) => {
-    if (params.startsWith("--")) throw 'A query must be provided before the optional flags. ' + helpMessage;
-
-    let newParams = defaultParams;
-    let res = params.split(" --");
-    const searchQuery = res.shift();
+    let splitRequestBodyStr = requestBodyStr.split(" --");
+    const searchQuery = splitRequestBodyStr.shift();
 
     // Optional flags provided in any order.
-    res.map((param) => {
+    splitRequestBodyStr.map((param) => {
         const keyPair = param.split(" ");
         if (keyPair[0] in defaultParams) {
-            newParams[keyPair[0]] = keyPair[0] === "result" ? keyPair[1] : true;
+            requestBodyObj[keyPair[0]] = keyPair[0] === "result" ? keyPair[1] : true;
         } else {
-            throw 'Invalid flag provided. ' + helpMessage;
+            throw 'Invalid flag provided. ' + constants.helpMessage;
         }
     });
 
-    // Query search params always first thing provided.
-    newParams["search"] = searchQuery;
-    return newParams;
+    // Query search requestBody always first thing provided.
+    requestBodyObj["snippet"] = searchQuery;
+    return requestBodyObj;
 }
 
-exports.helpMenu = () => {
-    const twiml = new MessagingResponse();
-    twiml.message(helpSms);
-    return twiml;
-}
