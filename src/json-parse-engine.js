@@ -3,15 +3,14 @@ const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const defaultParams = {
     "list": 1,
     "name": false,
-    "url": false,
-    "search": ""
+    "url": false
 }
 
 const defaultFlagsSms = ["list", "name", "url", "search"];
 
-const helpMessage = 'See "nodata --help" for further details.'
+const helpMessage = 'Text "--help" for further details.'
 const helpSms = `USAGE:
-nodata [search text] [options]
+[search text] [options]
 
 
 OPTIONS:
@@ -26,11 +25,11 @@ Provides the address of the result.
 
 
 EXAMPLES:
-nodata Will it rain tomorrow?
+Will it rain tomorrow?
 
-nodata Will it rain tomorrow? --name --url
+Will it rain tomorrow? --name --url
 
-nodata Will it rain tomorrow? --result 3 --name --url`
+Will it rain tomorrow? --result 3 --name --url`
 
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
@@ -61,26 +60,24 @@ exports.formatSms = (results) => {
 }
 
 exports.params = (params) => {
-    if (params.substring(0, 15) !== "nodata --search") throw 'A "--search" flag must be provided before other flags. ' + helpMessage;
+    if (params.startsWith("--")) throw 'A query must be provided before the optional flags. ' + helpMessage;
 
     let newParams = defaultParams;
-    let res = params.substring(6, params.length).split(" --");
-    res.shift();
+    let res = params.split(" --");
+    const searchQuery = res.shift();
 
+    // Optional flags provided in any order.
     res.map((param) => {
-        if (param.substring(0, 6) === "search") {
-            keyPair = [param.substring(0, 6), param.substring(7, param.length)];
-            if (keyPair[1] === "") throw 'Search terms must be provided after "--search". ' + helpMessage;
-        } else {
-            keyPair = param.split(" ");
-        }
+        const keyPair = param.split(" ");
         if (keyPair[0] in defaultParams) {
-            newParams[keyPair[0]] = keyPair[0] === "list" || keyPair[0] === "search" ? keyPair[1] : true;
+            newParams[keyPair[0]] = keyPair[0] === "list" ? keyPair[1] : true;
         } else {
             throw 'Invalid flag provided. ' + helpMessage;
         }
     });
 
+    // Query search params always first thing provided.
+    newParams["search"] = searchQuery;
     return newParams;
 }
 
