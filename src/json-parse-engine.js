@@ -7,6 +7,8 @@ const defaultParams = {
 }
 
 exports.getSingleResult = (rawResults, resultNum) => {
+    if (resultNum <= 0) throw '"--result" flag must be greater than 0. ' + constants.helpMessage;
+    if (rawResults.length < resultNum) throw `Result must be less than or equal to ${rawResults.length}. ` + constants.helpMessage;
     return rawResults[resultNum - 1];
 }
 
@@ -45,7 +47,7 @@ exports.convertResultToMessage = (filteredResult, resultNum, numTotalResults) =>
 exports.requestBodyToObj = (requestBodyStr) => {
     if (requestBodyStr.startsWith("--")) throw 'A query must be provided before the optional flags. ' + constants.helpMessage;
 
-    let requestBodyObj = defaultParams;
+    let requestBodyObj = JSON.parse(JSON.stringify(defaultParams));
 
     let splitRequestBodyStr = requestBodyStr.split(" --");
     const searchQuery = splitRequestBodyStr.shift();
