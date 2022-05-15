@@ -1,42 +1,57 @@
-const e = require("express");
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
 const defaultParams = {
     "list": 1,
     "name": false,
-    "url": false,
-    "isff": false,
-    "durl": false,
-    "dlc": false,
-    "search": ""
+    "url": false
 }
 
-const defaultFlagsSms = ["list", "name", "url", "isff", "durl", "dlc", "search"];
+const defaultFlagsSms = ["list", "name", "url", "search"];
+
+const helpMessage = 'Text "--help" for further details.'
+const helpSms = `USAGE:
+[search text] [options]
+
+
+OPTIONS:
+--result [number] -->
+Displays the number-th result.
+
+--name -->
+Provides the name of the result.
+
+--url -->
+Provides the address of the result.
+
+
+EXAMPLES:
+Will it rain tomorrow?
+
+Will it rain tomorrow? --name --url
+
+Will it rain tomorrow? --result 3 --name --url`
 
 exports.results = (raw_search, params) => {
     search = raw_search.slice(0, parseInt(params["list"]));
-    result = [];
     result = search.map((value) => {
         filteredValue = { "search": value["snippet"] };
         if (params["name"]) filteredValue["name"] = value["name"];
         if (params["url"]) filteredValue["url"] = value["url"];
-        if (params["isFamilyFriendly"]) filteredValue["isFamilyFriendly"] = value["isff"];
-        if (params["durl"]) filteredValue["durl"] = value["displayUrl"];
-        if (params["dlc"]) filteredValue["dlc"] = value["dateLastCrawled"];
         return filteredValue;
     });
     return result;
 }
 
-exports.formatSms = (results, numResults) => {
+exports.formatSms = (results) => {
     const twiml = new MessagingResponse();
+    const numResults = results.length;
     let resultCount = 1;
     results.map((result) => {
-        let sms = "-\n";
-        if (numResults >= 2) result["list"] = numResults;
+        let sms = "";
         defaultFlagsSms.map((flag) => {
-            if (result[flag] && flag === "list") sms += "@@\n" + flag + " -->\nShowing " + resultCount + " of " + result[flag] + "\n";
-            else if (result[flag]) sms += "@@\n" + flag + " -->\n" + result[flag] + "\n";
+            upperFlag = flag.toUpperCase();
+            if (numResults > 1 && flag === "list") sms += `${upperFlag} -->\nShowing ${resultCount} of ${numResults}\n\n`;
+            else if (result[flag]) sms += `${upperFlag} -->\n${result[flag]}\n\n`;
         });
         resultCount++;
         twiml.message(sms);
@@ -45,28 +60,29 @@ exports.formatSms = (results, numResults) => {
 }
 
 exports.params = (params) => {
-    if (params.substring(0, 7) === "nodata ") {
-        let newParams = defaultParams;
-        if (params.length <= 7) return false;
+    if (params.startsWith("--")) throw 'A query must be provided before the optional flags. ' + helpMessage;
 
-        let res = params.substring(6, params.length).split(" --");
-        res.shift();
+    let newParams = defaultParams;
+    let res = params.split(" --");
+    const searchQuery = res.shift();
 
-        res.map((param) => {
-            if (param.substring(0, 7) === "search ") {
-                keyPair = [param.substring(0, 6), param.substring(7, param.length)];
-            } else {
-                keyPair = param.split(" ");
-            }
-            if (keyPair[0] in defaultParams) {
-                newParams[keyPair[0]] = keyPair[0] === "list" || keyPair[0] === "search" ? keyPair[1] : true;
-            } else {
-                console.log("error");
-                throw "error";
-            }
-        });
+    // Optional flags provided in any order.
+    res.map((param) => {
+        const keyPair = param.split(" ");
+        if (keyPair[0] in defaultParams) {
+            newParams[keyPair[0]] = keyPair[0] === "list" ? keyPair[1] : true;
+        } else {
+            throw 'Invalid flag provided. ' + helpMessage;
+        }
+    });
 
-        return newParams;
-    }
-    return false;
+    // Query search params always first thing provided.
+    newParams["search"] = searchQuery;
+    return newParams;
+}
+
+exports.helpMenu = () => {
+    const twiml = new MessagingResponse();
+    twiml.message(helpSms);
+    return twiml;
 }

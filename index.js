@@ -17,16 +17,22 @@ app.get('/', async (req, res) => {
 app.post('/sms', async (req, res) => {
         const twiml = new MessagingResponse();
         try {
-                let params = jsonEngine.params(req.body.Body);
-                if (!params) throw "error";
-                let raw_search = await bingSearch.search(params.search);
-                let results = jsonEngine.results(raw_search.value, params);
-                let sms = jsonEngine.formatSms(results, params.list);
+                const request = req.body.Body.trim();
+                let sms;
+                if (request === "--help") {
+                        sms = jsonEngine.helpMenu();
+                } else {
+                        const params = jsonEngine.params(req.body.Body);
+                        const raw_search = await bingSearch.search(params.search);
+                        const results = jsonEngine.results(raw_search.value, params); 
+                        sms = jsonEngine.formatSms(results);
+                }
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
+                console.log(sms.toString());
                 res.end(sms.toString());
         } catch (e) {
                 console.log("error: ", e);
-                twiml.message("yo fam check the syntax");
+                twiml.message(e);
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
                 res.end(twiml.toString());
         }

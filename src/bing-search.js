@@ -2,13 +2,13 @@ const axios = require("axios");
 const secretsManagerClient = require('./secrets-manager').secretsManager();
 const secretsManager = require('./secrets-manager');
 
-const rapidApiKeyName = 'projects/7736567127/secrets/rapidapi-key';
+const rapidApiKeyName = 'projects/7736567127/secrets/rapidapi-key/versions/latest';
 
-const options = {
+const createOptions = (q, rapidApiKey) => ({
     method: 'GET',
     url: 'https://bing-web-search1.p.rapidapi.com/search',
     params: {
-        q: '', // Updated depending on params.
+        q: q,
         mkt: 'en-us',
         safeSearch: 'Off',
         textFormat: 'Raw',
@@ -17,17 +17,19 @@ const options = {
     headers: {
         'X-BingApis-SDK': 'true',
         'X-RapidAPI-Host': 'bing-web-search1.p.rapidapi.com',
-        'X-RapidAPI-Key': secretsManager.getSecret(secretsManagerClient, rapidApiKeyName),
+        'X-RapidAPI-Key': rapidApiKey,
     }
-};
+});
 
 exports.search = async (q) => {
-    options.params.q = q;
+    const rapidApiKey = await secretsManager.getSecret(secretsManagerClient, rapidApiKeyName);
+
+    const options = createOptions(q, rapidApiKey);
+    
     try {
         const response = await axios.request(options);
-        const data = response.data.webPages;
-        return data;
+        return response.data.webPages;
     } catch (error) {
-        console.log(error);
+        console.log('this is the error I\'m getting from exports.searc', error);
     }
 }
