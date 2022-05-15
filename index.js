@@ -19,8 +19,7 @@ app.post('/sms', async (req, res) => {
         try {
                 const request = req.body.Body.trim();
                 let sms;
-                if (request.substring(0, 6) !== "nodata") throw 'Text "nodata --help" to get started.';
-                if (request === "nodata --help") {
+                if (request === "--help") {
                         sms = jsonEngine.helpMenu();
                 } else {
                         const params = jsonEngine.params(req.body.Body);
