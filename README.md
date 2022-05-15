@@ -7,7 +7,7 @@
 Text 
 
 ```
-nodata --help
+--help
 ```
 
 to `(705) 710-3709`
