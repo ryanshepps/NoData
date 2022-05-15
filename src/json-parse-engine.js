@@ -1,13 +1,13 @@
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const twilio = require('./twilio');
 
 const defaultParams = {
-    "list": 1,
+    "result": 1,
     "name": false,
     "url": false,
     "search": ""
 }
 
-const defaultFlagsSms = ["list", "name", "url", "search"];
+const defaultFlagsSms = ["result", "name", "url", "search"];
 
 const helpMessage = 'See "nodata --help" for further details.'
 const helpSms = `USAGE:
@@ -32,32 +32,43 @@ nodata Will it rain tomorrow? --name --url
 
 nodata Will it rain tomorrow? --result 3 --name --url`
 
-exports.results = (raw_search, params) => {
-    search = raw_search.slice(0, parseInt(params["list"]));
-    result = search.map((value) => {
-        filteredValue = { "search": value["snippet"] };
-        if (params["name"]) filteredValue["name"] = value["name"];
-        if (params["url"]) filteredValue["url"] = value["url"];
-        return filteredValue;
-    });
-    return result;
+exports.getSingleResult = (rawResults, resultNum) => {
+    return rawResults[resultNum - 1];
 }
 
-exports.formatSms = (results) => {
-    const twiml = new MessagingResponse();
-    const numResults = results.length;
-    let resultCount = 1;
-    results.map((result) => {
-        let sms = "";
-        defaultFlagsSms.map((flag) => {
-            upperFlag = flag.toUpperCase();
-            if (numResults > 1 && flag === "list") sms += `${upperFlag} -->\nShowing ${resultCount} of ${numResults}\n\n`;
-            else if (result[flag]) sms += `${upperFlag} -->\n${result[flag]}\n\n`;
-        });
-        resultCount++;
-        twiml.message(sms);
+exports.filterResult = (result, params) => {
+    let filteredResult = {};
+
+    Object.keys(params).forEach((paramKey) => {
+        if (params[paramKey] && paramKey !== "result") {
+            filteredResult[paramKey] = result[paramKey];
+        }
     });
-    return twiml;
+
+    console.log('filteredResult', filteredResult);
+
+    return filteredResult;
+}
+
+exports.formatSms = (result, numTotalResults, requestedResultNum) => {
+    let sms = getRequestedResultInfo(result);
+
+    sms += `RESULT ${requestedResultNum}/${numTotalResults} -->\n`
+
+    return twilio.sendSms(sms);
+}
+
+// returns a string with info that the user requests about the results
+const getRequestedResultInfo = (result, params) => {
+    let sms = "";
+
+    defaultFlagsSms.forEach((flag) => {
+        if (flag !== "result") {
+            sms += `${flag.toUpperCase()} -->\n${result[flag]}\n\n`
+        }
+    });
+
+    return sms;
 }
 
 exports.params = (params) => {
@@ -75,7 +86,7 @@ exports.params = (params) => {
             keyPair = param.split(" ");
         }
         if (keyPair[0] in defaultParams) {
-            newParams[keyPair[0]] = keyPair[0] === "list" || keyPair[0] === "search" ? keyPair[1] : true;
+            newParams[keyPair[0]] = keyPair[0] === "result" || keyPair[0] === "search" ? keyPair[1] : true;
         } else {
             throw 'Invalid flag provided. ' + helpMessage;
         }

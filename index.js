@@ -24,9 +24,12 @@ app.post('/sms', async (req, res) => {
                         sms = jsonEngine.helpMenu();
                 } else {
                         const params = jsonEngine.params(req.body.Body);
-                        const raw_search = await bingSearch.search(params.search);
-                        const results = jsonEngine.results(raw_search.value, params); 
-                        sms = jsonEngine.formatSms(results);
+                        const rawSearchResult = await bingSearch.search(params.search);
+
+                        const result = jsonEngine.getSingleResult(rawSearchResult.value, parseInt(params.result));
+
+                        const filteredResult = jsonEngine.filterResult(result, params);
+                        sms = jsonEngine.formatSms(result, rawSearchResult.value.length, params);
                 }
                 res.writeHead(200, { 'Content-Type': 'text/xml' });
                 console.log(sms.toString());
